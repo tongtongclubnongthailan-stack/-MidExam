@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสอบออนไลน์ - โรงเรียนหอวัง</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+        .hidden { display: none; }
+        .violation-flash { border: 5px solid red !important; animation: shake 0.3s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <script>
+        // เชื่อมต่อ Firebase ตาม Config ที่คุณให้มา
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUrG3QMYDh7w-4zoIeTMVXQ-ZIDVK7OO0",
+            authDomain: "mid-exam-9e3dd.firebaseapp.com",
+            databaseURL: "https://mid-exam-9e3dd-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mid-exam-9e3dd",
+            storageBucket: "mid-exam-9e3dd.firebasestorage.app",
+            messagingSenderId: "123636368281",
+            appId: "1:123636368281:web:8ca0c071daf8033ede4908",
+            measurementId: "G-XZR9WCGXP0"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+    </script>
+
+    <header class="bg-blue-900 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <div>
+                <h1 class="font-bold text-lg">โรงเรียนหอวัง</h1>
+                <p class="text-[10px] text-blue-200 uppercase">ว31214 Fundamental of Technology Design</p>
+            </div>
+            <div id="room-timer" class="hidden bg-red-600 px-4 py-1 rounded-full font-bold text-sm animate-pulse">
+                เวลาคงเหลือ: <span id="timer-display">45:00</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto mt-8 p-4">
+
+        <div id="page-welcome" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl text-center border-t-8 border-blue-600">
+            <h2 class="text-xl font-bold mb-2">สอบกลางภาค 2/2568</h2>
+            <p class="text-gray-400 text-xs mb-8">กรุณาเลือกสถานะเพื่อเข้าใช้งาน</p>
+            <div class="space-y-4">
+                <button onclick="showPage('page-student-login')" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition transform hover:scale-105">นักเรียนเข้าสอบ</button>
+                <button onclick="showPage('page-teacher-auth')" class="w-full bg-gray-100 text-gray-600 p-4 rounded-xl border hover:bg-gray-200 transition">สำหรับคุณครู</button>
+            </div>
+        </div>
+
+        <div id="page-student-login" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl hidden">
+            <h2 class="text-xl font-bold mb-6 text-center text-gray-800">ลงชื่อเข้าสอบ</h2>
+            <div class="space-y-4">
+                <input type="text" id="std-name" placeholder="ชื่อ-นามสกุล" class="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400">
+                <div class="flex gap-2">
+                    <select id="std-class" class="w-2/3 border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400">
+                        <option value="">-- เลือกห้องเรียน --</option>
+                        <script>for(let i=1; i<=8; i++) document.write(`<option value="4/${i}">ม.4/${i}</option>`);</script>
+                    </select>
+                    <input type="number" id="std-no" placeholder="เลขที่" class="w-1/3 border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
+                <button onclick="studentJoin()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold hover:bg-green-700 shadow-md transition">เข้าสู่ห้องพักรอ</button>
+            </div>
+        </div>
+
+        <div id="page-waiting" class="max-w-md mx-auto bg-white p-10 rounded-2xl shadow-xl hidden text-center">
+            <div class="mb-6"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div></div>
+            <h2 class="text-xl font-bold text-gray-800 italic">สวัสดี, <span id="wait-name" class="text-blue-600"></span></h2>
+            <p class="text-gray-500 mt-2">กำลังรอคุณครูเปิดระบบสอบห้อง <span id="wait-class" class="font-bold underline text-black"></span></p>
+            <div class="mt-8 p-4 bg-red-50 text-red-600 text-[10px] rounded-lg border border-red-100 uppercase font-bold">
+                * Warning: Do not switch tabs once the exam starts.
+            </div>
+        </div>
+
+        <div id="page-teacher-auth" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl hidden text-center">
+            <h2 class="text-xl font-bold mb-4">Teacher Access</h2>
+            <input type="password" id="teacher-pin" placeholder="รหัสผ่านผู้ควบคุม" class="w-full border p-4 rounded-xl mb-4 text-center text-xl tracking-widest outline-none">
+            <button onclick="teacherLogin()" class="w-full bg-red-600 text-white p-4 rounded-xl font-bold hover:bg-red-700">ยืนยันรหัสผ่าน</button>
+        </div>
+
+        <div id="page-teacher-dashboard" class="max-w-5xl mx-auto hidden px-4">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">แผงควบคุมครู <span class="text-sm font-normal text-gray-400 ml-2 italic">ว31214</span></h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <script>
+                    for(let i=1; i<=8; i++){
+                        document.write(`
+                            <div onclick="openRoomDetail('4/${i}')" class="bg-white p-6 rounded-2xl shadow-md cursor-pointer hover:bg-blue-50 transition border-b-4 border-gray-300 hover:border-blue-500 transform hover:-translate-y-1">
+                                <h3 class="font-bold text-xl text-gray-700">ห้อง 4/${i}</h3>
+                                <div id="count-4-${i}" class="text-xs text-blue-500 mt-2 font-bold">ออนไลน์: 0 คน</div>
+                                <div id="status-4-${i}" class="text-[10px] mt-4 font-bold text-gray-300">รอกดเริ่มสอบ...</div>
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </div>
+
+        <div id="page-room-detail" class="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-xl hidden">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b pb-6">
+                <div class="flex items-center gap-4">
+                    <button onclick="showPage('page-teacher-dashboard')" class="bg-gray-100 p-2 rounded-lg text-gray-500 hover:bg-gray-200">← กลับ</button>
+                    <h2 id="room-detail-title" class="text-3xl font-bold text-gray-800"></h2>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-toggle-room" onclick="toggleRoomState()" class="px-8 py-3 rounded-xl font-bold text-white shadow-lg transition"></button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                        <tr>
+                            <th class="p-4 text-center">เลขที่</th>
+                            <th class="p-4">ชื่อ-นามสกุล</th>
+                            <th class="p-4 text-center">สถานะ</th>
+                            <th class="p-4 text-center text-red-600 font-bold">พับหน้าจอ (ครั้ง)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-list-body" class="divide-y divide-gray-50 text-sm">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="page-exam" class="max-w-4xl mx-auto bg-white p-12 rounded-2xl shadow-2xl hidden border-t-8 border-green-500">
+            <div class="text-center">
+                <div class="mb-6"><img src="https://cdn-icons-png.flaticon.com/512/3407/3407024.png" class="h-20 mx-auto opacity-80"></div>
+                <h2 class="text-3xl font-bold text-blue-900 mb-4">กำลังดำเนินการสอบ</h2>
+                <p class="text-gray-500 max-w-sm mx-auto mb-10">ระบบกำลังบันทึกเวลา พฤติกรรมการสลับหน้าจอ และข้อมูลการตอบของคุณอย่างต่อเนื่อง...</p>
+                <button onclick="finishExam()" class="bg-green-600 text-white px-12 py-5 rounded-2xl font-bold text-xl hover:bg-green-700 shadow-2xl transition transform hover:scale-105">ส่งข้อสอบ (FINISH)</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let me = {}; let currentRoom = ""; let violations = 0;
+        const alertSound = new Audio('https://actions.google.com/google_assistant/ambience/white_noise/beep.mp3');
+
+        function showPage(id) {
+            document.querySelectorAll('main > div').forEach(d => d.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        // --- ส่วนของนักเรียน ---
+        function studentJoin() {
+            const name = document.getElementById('std-name').value;
+            const room = document.getElementById('std-class').value;
+            const no = document.getElementById('std-no').value;
+            if(!name || !room || !no) return alert("กรุณากรอกข้อมูลให้ครบถ้วนก่อนเข้าสอบ");
+
+            me = { name, room, no, status: 'online', violations: 0 };
+            document.getElementById('wait-name').innerText = name;
+            document.getElementById('wait-class').innerText = "ม." + room;
+            showPage('page-waiting');
+
+            // แจ้งเตือนครูว่าเด็กเข้ามาแล้ว
+            db.ref(`presence/${room}/${no}`).set(me);
+            
+            // ตรวจสอบสัญญาณเริ่มสอบจากครู
+            db.ref(`rooms/${room}/state`).on('value', snap => {
+                if(snap.val() === 'started') startExam();
+            });
+        }
+
+        function startExam() {
+            showPage('page-exam');
+            document.getElementById('room-timer').classList.remove('hidden');
+            
+            // ระบบจับโกง
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === 'hidden' && !document.getElementById('page-exam').classList.contains('hidden')) {
+                    violations++;
+                    alertSound.play();
+                    document.body.classList.add('violation-flash');
+                    setTimeout(() => document.body.classList.remove('violation-flash'), 500);
+                    db.ref(`presence/${me.room}/${me.no}/violations`).set(violations);
+                }
+            });
+        }
+
+        function finishExam() {
+            if(!confirm("ตรวจสอบความเรียบร้อยแล้วใช่หรือไม่? ระบบจะไม่สามารถกลับมาแก้ไขได้อีก")) return;
+            db.ref(`presence/${me.room}/${me.no}/status`).set('finished');
+            alert("บันทึกข้อมูลและส่งข้อสอบเรียบร้อยแล้ว");
+            location.reload();
+        }
+
+        // --- ส่วนของคุณครู ---
+        function teacherLogin() {
+            const pin = document.getElementById('teacher-pin').value;
+            if(pin === 'HWteacher2568') {
+                showPage('page-teacher-dashboard');
+                initTeacherDashboard();
+            } else {
+                alert("รหัสผ่านไม่ถูกต้อง");
+            }
+        }
+
+        function initTeacherDashboard() {
+            for(let i=1; i<=8; i++) {
+                const room = `4/${i}`;
+                // นับจำนวนนักเรียนออนไลน์
+                db.ref(`presence/${room}`).on('value', snap => {
+                    document.getElementById(`count-4-${i}`).innerText = `ออนไลน์: ${snap.numChildren()} คน`;
+                });
+                // แสดงสถานะห้อง
+                db.ref(`rooms/${room}/state`).on('value', snap => {
+                    const st = document.getElementById(`status-4-${i}`);
+                    if(snap.val() === 'started') {
+                        st.innerText = "● กำลังดำเนินการสอบ";
+                        st.className = "text-[10px] mt-4 font-bold text-green-500 animate-pulse";
+                    } else {
+                        st.innerText = "○ รอเปิดห้องสอบ";
+                        st.className = "text-[10px] mt-4 font-bold text-gray-300";
+                    }
+                });
+            }
+        }
+
+        function openRoomDetail(room) {
+            currentRoom = room;
+            showPage('page-room-detail');
+            document.getElementById('room-detail-title').innerText = "ห้อง ม." + room;
+
+            // สังเกตสถานะปุ่มเริ่ม/ปิด
+            db.ref(`rooms/${room}/state`).on('value', snap => {
+                const btn = document.getElementById('btn-toggle-room');
+                if(snap.val() === 'started') {
+                    btn.innerText = "หยุดการสอบ (CLOSE)";
+                    btn.className = "px-8 py-3 rounded-xl font-bold text-white shadow-lg bg-red-600 hover:bg-red-700";
+                } else {
+                    btn.innerText = "เริ่มการสอบ (START EXAM)";
+                    btn.className = "px-8 py-3 rounded-xl font-bold text-white shadow-lg bg-green-600 hover:bg-green-700";
+                }
+            });
+
+            // ดึงรายชื่อนักเรียนในห้องนั้น
+            db.ref(`presence/${room}`).on('value', snap => {
+                const tbody = document.getElementById('student-list-body');
+                tbody.innerHTML = "";
+                snap.forEach(child => {
+                    const d = child.val();
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-4 text-center font-bold text-gray-400">${d.no}</td>
+                            <td class="p-4 font-bold text-gray-700">${d.name}</td>
+                            <td class="p-4 text-center">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold ${d.status==='finished'?'bg-green-100 text-green-600':'bg-blue-100 text-blue-600'}">
+                                    ${d.status.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="p-4 text-center font-bold text-red-600 bg-red-50 italic">
+                                ${d.violations || 0}
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function toggleRoomState() {
+            const ref = db.ref(`rooms/${currentRoom}/state`);
+            ref.once('value', s => {
+                ref.set(s.val() === 'started' ? 'closed' : 'started');
+            });
+        }
+    </script>
+</body>
+</html>
