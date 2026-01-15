@@ -15,6 +15,7 @@
         @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
         .violation-flash { border: 5px solid red !important; animation: shake 0.3s; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        input[type="text"]:focus { background-color: #fffbeb; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -50,7 +51,7 @@
         
         <div id="page-entry" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-2xl text-center border-t-8 border-blue-600">
             <h2 class="text-2xl mb-2 font-bold text-gray-800">แบบทดสอบวัดผลกลางภาคเรียนที่ 2</h2>
-            <p class="text-gray-500 mb-8 text-sm italic">ปีการศึกษา 2568 (คะแนนเต็ม 25 คะแนน)</p>
+            <p class="text-gray-500 mb-8 text-sm italic">ปีการศึกษา 2568 (50 นาที / 25 คะแนน)</p>
             <div class="space-y-4">
                 <button onclick="showPage('student-login')" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg transition transform hover:scale-105">สำหรับนักเรียน (เข้าสอบ)</button>
                 <button onclick="showPage('teacher-login')" class="w-full bg-gray-100 text-gray-700 p-4 rounded-xl hover:bg-gray-200 font-bold transition border border-gray-300">สำหรับคุณครู (จัดการระบบ)</button>
@@ -58,7 +59,7 @@
         </div>
 
         <div id="student-login" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-2xl hidden border-t-8 border-green-500">
-            <h2 class="text-xl font-bold mb-6 text-center text-gray-800">กรอกข้อมูลผู้เข้าสอบ</h2>
+            <h2 class="text-xl font-bold mb-6 text-center text-gray-800 uppercase tracking-tighter">Login Student</h2>
             <div class="space-y-4 text-left">
                 <div class="flex gap-2">
                     <input type="text" id="std-name" placeholder="ชื่อ" class="w-1/2 border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400">
@@ -78,28 +79,37 @@
         <div id="waiting-room" class="max-w-md mx-auto bg-white p-10 rounded-2xl shadow-xl hidden text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
             <h2 class="text-xl font-bold text-gray-800 italic">สวัสดี, <span id="wait-name" class="text-blue-600"></span></h2>
-            <p class="text-gray-500 mt-2 italic text-sm">บันทึกข้อมูลสำเร็จแล้ว กำลังรอคุณครูเปิดระบบสอบห้อง <span id="wait-class" class="font-bold underline text-black"></span></p>
+            <p class="text-gray-500 mt-2 italic text-sm text-center">บันทึกข้อมูลสำเร็จแล้ว<br>กำลังรอคุณครูเปิดระบบสอบห้อง <span id="wait-class" class="font-bold underline text-black"></span></p>
             <div class="mt-8 p-4 bg-red-50 text-red-600 text-[10px] rounded-lg border border-red-100 uppercase font-bold tracking-tighter">
-                * ข้อควรระวัง: เมื่อเริ่มสอบแล้ว ห้ามสลับหน้าจอหรือพับโปรแกรมเด็ดขาด
+                * Warning: ห้ามสลับหน้าจอหรือพับโปรแกรมเมื่อเริ่มสอบเด็ดขาด
             </div>
         </div>
 
-        <div id="exam-container" class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-2xl hidden mb-10 border-t-8 border-blue-900">
+        <div id="exam-container" class="max-w-5xl mx-auto bg-white p-6 md:p-12 rounded-2xl shadow-2xl hidden mb-10 border-t-8 border-blue-900">
+            
             <div id="exam-p1" class="exam-page">
                 <div class="mb-8 p-4 bg-blue-50 rounded-lg border-l-8 border-blue-500 text-left">
                     <h2 class="text-xl font-bold text-blue-800 tracking-tighter">แบบทดสอบที่ 1: คำสั่งลัดพื้นฐานในการทำงาน (12 คะแนน)</h2>
                 </div>
+
                 <div class="mb-10 p-6 bg-gray-50 rounded-2xl border text-left">
-                    <p class="font-bold text-lg mb-6 text-gray-800">1. โปรแกรม Blender คือซอฟต์แวร์ที่มีวัตถุประสงค์หลักเพื่ออะไร?</p>
+                    <p class="font-bold text-lg mb-6 text-gray-800">คำถาม: โปรแกรม Blender คือซอฟต์แวร์ที่มีวัตถุประสงค์หลักเพื่ออะไร?</p>
                     <div class="grid grid-cols-1 gap-4">
+                        <label class="p-4 border rounded-xl hover:bg-blue-50 cursor-pointer flex items-center gap-4 transition bg-white">
+                            <input type="radio" name="q_blender" value="ก" class="w-5 h-5"> ก. ใช้สำหรับพิมพ์เอกสารและจัดทำรายงานทางธุรกิจ
+                        </label>
+                        <label class="p-4 border rounded-xl hover:bg-blue-50 cursor-pointer flex items-center gap-4 transition bg-white">
+                            <input type="radio" name="q_blender" value="ข" class="w-5 h-5"> ข. ใช้สำหรับการตัดต่อรูปภาพแบบ Vector เช่น การออกแบบโลโก้เพียงอย่างเดียว
+                        </label>
                         <label class="p-4 border rounded-xl hover:bg-blue-100 cursor-pointer flex items-center gap-4 transition bg-white border-blue-200">
                             <input type="radio" name="q_blender" value="ค" class="w-5 h-5"> ค. เป็นชุดเครื่องมือสร้างสรรค์งานกราฟิก 3D แบบครบวงจร ตั้งแต่การปั้นโมเดลไปจนถึงการทำแอนิเมชัน
                         </label>
                         <label class="p-4 border rounded-xl hover:bg-blue-50 cursor-pointer flex items-center gap-4 transition bg-white">
-                            <input type="radio" name="q_blender" value="ก" class="w-5 h-5"> ก. ใช้สำหรับพิมพ์เอกสาร
+                            <input type="radio" name="q_blender" value="ง" class="w-5 h-5"> ง. เป็นโปรแกรมสำหรับป้องกันไวรัสและเพิ่มความเร็วให้คอมพิวเตอร์
                         </label>
                     </div>
                 </div>
+
                 <div class="mb-8 overflow-x-auto rounded-xl border">
                     <table class="w-full text-center border-collapse">
                         <thead class="bg-gray-800 text-white text-sm">
@@ -107,15 +117,15 @@
                         </thead>
                         <tbody class="divide-y text-sm">
                             <tr><td class="p-4 font-bold bg-gray-100 uppercase border">G</td><td class="p-4 italic text-gray-400 border">ใช้สำหรับย้ายตำแหน่งวัตถุ (Move)</td></tr>
-                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">R</td><td class="p-4 border"><input type="text" id="ans_r" class="w-full p-2 text-center outline-none"></td></tr>
-                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">S</td><td class="p-4 border"><input type="text" id="ans_s" class="w-full p-2 text-center outline-none"></td></tr>
+                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">R</td><td class="p-4 border"><input type="text" id="ans_r" class="w-full p-2 text-center outline-none border-b-2 border-blue-100" placeholder="เติมคำตอบ..."></td></tr>
+                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">S</td><td class="p-4 border"><input type="text" id="ans_s" class="w-full p-2 text-center outline-none border-b-2 border-blue-100" placeholder="เติมคำตอบ..."></td></tr>
                             <tr><td class="p-4 font-bold bg-gray-100 border italic text-xs">Shift + A</td><td class="p-4 italic text-gray-400 border text-xs">ใช้สำหรับเปิดเมนูเพื่อเพิ่มวัตถุรูปทรงต่างๆ (Add Object)</td></tr>
-                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">I</td><td class="p-4 border"><input type="text" id="ans_i" class="w-full p-2 text-center outline-none"></td></tr>
-                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">E</td><td class="p-4 border"><input type="text" id="ans_e" class="w-full p-2 text-center outline-none"></td></tr>
+                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">I</td><td class="p-4 border"><input type="text" id="ans_i" class="w-full p-2 text-center outline-none border-b-2 border-blue-100" placeholder="เติมคำตอบ..."></td></tr>
+                            <tr><td class="p-4 font-bold bg-gray-100 uppercase border text-blue-600">E</td><td class="p-4 border"><input type="text" id="ans_e" class="w-full p-2 text-center outline-none border-b-2 border-blue-100" placeholder="เติมคำตอบ..."></td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="text-right"><button onclick="changeExamPage(2)" class="bg-blue-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-blue-700">หน้าถัดไป ></button></div>
+                <div class="text-right"><button onclick="changeExamPage(2)" class="bg-blue-600 text-white px-10 py-3 rounded-xl font-bold shadow-lg">หน้าถัดไป ></button></div>
             </div>
 
             <div id="exam-p2" class="exam-page hidden">
@@ -124,60 +134,62 @@
                 </div>
                 <div class="space-y-8 text-left">
                     <div>
-                        <p class="font-bold text-gray-800 mb-2">2.1 คุณสมบัติหลักของ Base Color คืออะไร และมีบทบาทสำคัญอย่างไร? (2 คะแนน)</p>
-                        <textarea id="ans_2_1" class="w-full border-2 p-4 h-32 rounded-xl outline-none" placeholder="อธิบาย..."></textarea>
+                        <p class="font-bold text-gray-800 mb-2 italic underline text-xs">2.1 คุณสมบัติหลักของ Base Color คืออะไร และมีบทบาทสำคัญอย่างไร? (2 คะแนน)</p>
+                        <textarea id="ans_2_1" class="w-full border-2 p-4 h-32 rounded-xl outline-none focus:border-green-500 transition" placeholder="ตอบที่นี่..."></textarea>
                     </div>
                     <div>
-                        <p class="font-bold text-gray-800 mb-2">2.2 การออกแบบวัสดุ "แก้วใส" ต้องปรับค่าเครื่องมือใดบ้าง? (2 คะแนน)</p>
-                        <textarea id="ans_2_2" class="w-full border-2 p-4 h-32 rounded-xl outline-none" placeholder="อธิบายการปรับค่า..."></textarea>
+                        <p class="font-bold text-gray-800 mb-2 italic underline text-xs">2.2 หากต้องการออกแบบวัสดุ "แก้วใส" ต้องปรับค่าเครื่องมือใดบ้าง? (2 คะแนน)</p>
+                        <textarea id="ans_2_2" class="w-full border-2 p-4 h-32 rounded-xl outline-none focus:border-green-500 transition" placeholder="อธิบายเครื่องมือและการปรับค่าที่นี่..."></textarea>
                     </div>
                 </div>
-                <div class="mt-10 flex justify-between"><button onclick="changeExamPage(1)" class="text-gray-400 underline">ย้อนกลับ</button><button onclick="changeExamPage(3)" class="bg-blue-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-blue-700">หน้าถัดไป ></button></div>
+                <div class="mt-10 flex justify-between"><button onclick="changeExamPage(1)" class="text-gray-400 underline">ย้อนกลับ</button><button onclick="changeExamPage(3)" class="bg-blue-600 text-white px-10 py-3 rounded-xl font-bold shadow-lg">หน้าถัดไป ></button></div>
             </div>
 
             <div id="exam-p3" class="exam-page hidden text-left">
                 <div class="mb-8 p-4 bg-orange-50 rounded-lg border-l-8 border-orange-500">
-                    <h2 class="text-xl font-bold text-orange-800 tracking-tighter">แบบทดสอบที่ 3 & 4 (9 คะแนน)</h2>
+                    <h2 class="text-xl font-bold text-orange-800 tracking-tighter uppercase tracking-widest text-xs">แบบทดสอบที่ 3 & 4 (9 คะแนน)</h2>
                 </div>
+                <p class="mb-4 font-bold text-gray-700 italic text-xs underline">3.1 จงอธิบายแสง 4 ประเภทลงในตาราง (ข้อละ 1 คะแนน):</p>
                 <div class="mb-8 overflow-x-auto rounded-xl border">
                     <table class="w-full border-collapse">
-                        <thead class="bg-gray-800 text-white text-xs uppercase">
-                            <tr><th class="p-4 border">ประเภทแสง</th><th class="p-4 border">ลักษณะการใช้งาน</th></tr>
+                        <thead class="bg-gray-800 text-white text-[10px] uppercase">
+                            <tr><th class="p-4 border">ประเภทของแสง</th><th class="p-4 border">ลักษณะการส่องแสง</th><th class="p-4 border">การใช้งาน</th></tr>
                         </thead>
-                        <tbody class="text-sm">
-                            <tr><td class="p-4 border font-bold text-center italic">Point</td><td class="p-4 border italic text-gray-500">ใช้สำหรับหลอดไฟ, เทียน...</td></tr>
-                            <tr><td class="p-4 border font-bold text-center uppercase text-blue-600">Sun</td><td class="p-4 border"><input type="text" id="ans_sun" class="w-full p-2 border-b outline-none text-center" placeholder="เติมลักษณะแสง..."></td></tr>
-                            <tr><td class="p-4 border font-bold text-center uppercase text-blue-600">Spot</td><td class="p-4 border"><input type="text" id="ans_spot" class="w-full p-2 border-b outline-none text-center" placeholder="เติมลักษณะการใช้งาน..."></td></tr>
-                            <tr><td class="p-4 border font-bold text-center italic">Area</td><td class="p-4 border italic text-gray-400 text-xs">จำลองแสงจากพื้นผิวเรียบที่มีขนาด (Plane)</td></tr>
+                        <tbody class="text-xs">
+                            <tr><td class="p-4 border font-bold text-center italic">Point</td><td class="p-4 border"><input type="text" id="ans_l_1" class="w-full p-1 border-b outline-none text-center" placeholder="1.) เติมลักษณะ..."></td><td class="p-4 border italic text-gray-400">ใช้สำหรับหลอดไฟ, เทียน...</td></tr>
+                            <tr><td class="p-4 border font-bold text-center uppercase text-blue-600">Sun (2.1)</td><td class="p-4 border italic text-gray-400">แสงมีความเข้มคงที่ขนานกันทั้งฉาก</td><td class="p-4 border"><input type="text" id="ans_l_2" class="w-full p-1 border-b outline-none text-center" placeholder="2.2) เติมการใช้งาน..."></td></tr>
+                            <tr><td class="p-4 border font-bold text-center uppercase text-blue-600">Spot (3.1)</td><td class="p-4 border"><input type="text" id="ans_l_3" class="w-full p-1 border-b outline-none text-center" placeholder="3.2) เติมลักษณะ..."></td><td class="p-4 border italic text-gray-400">ใช้สำหรับไฟฉาย, ไฟเวที...</td></tr>
+                            <tr><td class="p-4 border font-bold text-center uppercase text-blue-600">Area (4.1)</td><td class="p-4 border italic text-gray-400">จำลองแสงจากพื้นผิวเรียบที่มีขนาด</td><td class="p-4 border"><input type="text" id="ans_l_4" class="w-full p-1 border-b outline-none text-center" placeholder="4.2) เติมการใช้งาน..."></td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div>
-                    <p class="font-bold text-gray-800 mb-2 uppercase text-[10px] tracking-widest">4.1 ลำดับขั้นตอนการตั้งค่ากล้อง (Track To) จนถึงการ Render (5 คะแนน)</p>
-                    <textarea id="ans_4_1" class="w-full border-2 p-4 h-48 rounded-xl outline-none focus:border-orange-500 transition" placeholder="1... 2... 3..."></textarea>
+                <div class="mb-10">
+                    <p class="font-bold text-gray-800 mb-2 uppercase text-[10px] tracking-widest italic underline">4.1 ลำดับขั้นตอนการตั้งค่ากล้อง (Track To) จนถึงการ Render (5 คะแนน)</p>
+                    <textarea id="ans_4_1" class="w-full border-2 p-4 h-40 rounded-xl outline-none focus:border-orange-500 transition" placeholder="ลำดับขั้นตอนที่ 1... 2... 3..."></textarea>
                 </div>
                 <div class="mt-10"><button onclick="finishExam()" class="w-full bg-red-600 text-white py-5 rounded-2xl font-bold text-xl shadow-2xl transition transform hover:scale-105 uppercase tracking-widest">ส่งข้อสอบ (FINISH EXAM)</button></div>
             </div>
         </div>
 
         <div id="teacher-login" class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-2xl hidden text-center border-t-8 border-red-500">
-            <h2 class="text-xl font-bold mb-4 text-red-600 tracking-tight">Teacher Access</h2>
-            <input type="password" id="teacher-pass" placeholder="กรอกรหัสผ่าน" class="w-full border p-4 mb-4 rounded-xl outline-none text-center text-2xl tracking-widest">
-            <button onclick="teacherAuth()" class="w-full bg-red-600 text-white p-4 rounded-xl font-bold hover:bg-red-700 transition">เข้าสู่แผงควบคุม</button>
+            <h2 class="text-xl font-bold mb-4 text-red-600 tracking-tight">Teacher Admin</h2>
+            <input type="password" id="teacher-pass" placeholder="รหัสผ่าน" class="w-full border p-4 mb-4 rounded-xl outline-none text-center text-2xl tracking-widest">
+            <button onclick="teacherAuth()" class="w-full bg-red-600 text-white p-4 rounded-xl font-bold hover:bg-red-700 transition">Login Dashboard</button>
+            <button onclick="showPage('page-entry')" class="mt-4 text-gray-400 text-xs underline">Back</button>
         </div>
 
         <div id="teacher-dash" class="max-w-5xl mx-auto hidden bg-white p-8 rounded-2xl shadow-xl">
-             <div class="flex justify-between items-center mb-8 pb-4 border-b">
-                <h2 class="text-2xl font-bold text-gray-800 uppercase tracking-tighter">Teacher Dashboard</h2>
-                <button onclick="clearAllData()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition">RESET DATA</button>
+             <div class="flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b gap-4">
+                <h2 class="text-2xl font-bold text-gray-800 uppercase tracking-tighter">Teacher Control</h2>
+                <button onclick="clearAllData()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-600 hover:text-white transition">RESET STUDENT DATA</button>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 text-center">
                 <script>
                     for(let i=1; i<=8; i++) {
                         document.write(`
                             <div onclick="manageRoom('4/${i}')" class="p-6 border-2 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition text-center group">
                                 <h3 class="font-bold text-lg group-hover:text-blue-600">ห้อง 4/${i}</h3>
-                                <p id="room-status-4-${i}" class="text-[10px] mt-2 text-gray-400 font-bold uppercase tracking-widest">รอเปิดสอบ</p>
+                                <p id="room-status-4-${i}" class="text-[10px] mt-2 text-gray-400 font-bold uppercase tracking-widest">OFFLINE</p>
                                 <p id="teacher-timer-4-${i}" class="text-sm mt-1 font-bold text-red-600 hidden">50:00</p>
                             </div>
                         `);
@@ -185,7 +197,7 @@
                 </script>
             </div>
             <div id="room-controls" class="hidden border-t-4 border-blue-600 pt-8 mt-8">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                     <h3 id="current-room-title" class="text-2xl font-bold"></h3>
                     <div class="flex gap-4 items-center">
                         <div id="active-timer-box" class="hidden bg-gray-100 px-4 py-2 rounded-lg border">
@@ -197,7 +209,7 @@
                 <div class="overflow-x-auto rounded-xl border">
                     <table class="w-full text-left">
                         <thead class="bg-gray-800 text-white text-xs uppercase">
-                            <tr><th class="p-4 text-center">เลขที่</th><th class="p-4">ชื่อ-นามสกุล</th><th class="p-4 text-center">สถานะ</th><th class="p-4 text-center text-red-400">พับหน้าจอ</th></tr>
+                            <tr><th class="p-4 text-center">เลขที่</th><th class="p-4">ชื่อ-นามสกุล</th><th class="p-4 text-center">สถานะ</th><th class="p-4 text-center text-red-400 font-bold">พับหน้าจอ</th></tr>
                         </thead>
                         <tbody id="student-list-body" class="text-sm divide-y"></tbody>
                     </table>
@@ -206,9 +218,10 @@
         </div>
 
         <div id="result-page" class="max-w-md mx-auto bg-white p-10 rounded-2xl shadow-2xl hidden text-center border-t-8 border-green-500">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">ส่งข้อสอบเรียบร้อย!</h2>
-            <div id="final-student-info" class="bg-blue-50 p-4 rounded-xl mb-4 font-bold text-blue-800 text-xs uppercase tracking-widest"></div>
-            <p id="final-violation-report" class="text-red-600 font-bold text-sm italic tracking-widest"></p>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 uppercase tracking-tighter">ส่งข้อสอบเรียบร้อย!</h2>
+            <div id="final-student-info" class="bg-blue-50 p-4 rounded-xl mb-4 font-bold text-blue-800 uppercase text-[10px] tracking-widest"></div>
+            <p class="text-gray-500 text-xs italic uppercase tracking-tighter">Horwang School | ว31214</p>
+            <div id="final-violation-report" class="p-4 bg-red-50 rounded-xl text-red-600 font-bold text-xs italic tracking-tighter mt-4"></div>
         </div>
 
     </main>
@@ -216,6 +229,7 @@
     <script>
         let me = {}; let violationCount = 0; let timeLeft = 50 * 60;
         let timerInterval; let selectedRoom = ""; let teacherTimers = {};
+        const alertSnd = new Audio('https://actions.google.com/google_assistant/ambience/white_noise/beep.mp3');
 
         function showPage(id) {
             document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
@@ -231,12 +245,12 @@
             window.scrollTo(0,0);
         }
 
-        function formatTime(seconds) {
-            let m = Math.floor(seconds / 60); let s = seconds % 60;
+        function formatTime(sec) {
+            let m = Math.floor(sec / 60); let s = sec % 60;
             return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
         }
 
-        // --- ระบบนักเรียน ---
+        // --- Students ---
         function studentJoin() {
             const name = document.getElementById('std-name').value;
             const surname = document.getElementById('std-surname').value;
@@ -244,17 +258,12 @@
             const no = document.getElementById('std-no').value;
             if(!name || !surname || !room || !no) return alert('กรุณากรอกข้อมูลให้ครบถ้วน');
 
-            me = { fullname: `${name} ${surname}`, room, no, violations: 0, status: 'online' };
+            me = { fullname: `${name} ${surname}`, room, no, violations: 0, status: 'waiting' };
             document.getElementById('wait-name').innerText = me.fullname;
             document.getElementById('wait-class').innerText = "ม." + room;
-            
-            // เปลี่ยนเป็นหน้าพักรอทันที
             showPage('waiting-room');
 
-            // บันทึกสถานะออนไลน์
             db.ref(`presence/${room}/${no}`).set(me);
-            
-            // ตรวจจับสัญญาณเริ่มสอบจากเครื่องครู
             db.ref(`rooms/${room}/state`).on('value', snap => {
                 if(snap.val() === 'started') startExam();
                 if(snap.val() === 'reset' || snap.val() === 'closed') location.reload();
@@ -265,15 +274,13 @@
             if(!document.getElementById('exam-container').classList.contains('hidden')) return;
             showPage('exam-container');
             document.getElementById('timer-display').classList.remove('hidden');
-            
             timerInterval = setInterval(() => {
                 document.getElementById('timer-display').innerText = `เวลาคงเหลือ: ${formatTime(timeLeft)}`;
                 if (timeLeft-- <= 0) { clearInterval(timerInterval); finishExam(); }
             }, 1000);
-
             document.addEventListener("visibilitychange", () => {
                 if (document.visibilityState === 'hidden' && !document.getElementById('exam-container').classList.contains('hidden')) {
-                    violationCount++;
+                    violationCount++; alertSnd.play();
                     db.ref(`presence/${me.room}/${me.no}/violations`).set(violationCount);
                 }
             });
@@ -282,73 +289,62 @@
         function finishExam() {
             if(!confirm("ยืนยันการส่งข้อสอบ?")) return;
             clearInterval(timerInterval);
-            db.ref(`presence/${me.room}/${me.no}/status`).set('finished');
+            const ans = { q1: document.querySelector('input[name="q_blender"]:checked')?.value || "-", r: document.getElementById('ans_r').value };
+            db.ref(`presence/${me.room}/${me.no}`).update({ status: 'finished', ans: ans, final_v: violationCount });
             showPage('result-page');
             document.getElementById('final-student-info').innerText = `${me.fullname} | ม.${me.room} เลขที่ ${me.no}`;
-            document.getElementById('final-violation-report').innerText = `พฤติกรรมการสอบ: สลับหน้าจอ ${violationCount} ครั้ง`;
+            document.getElementById('final-violation-report').innerText = `พบพฤติกรรมการสลับหน้าจอ: ${violationCount} ครั้ง`;
         }
 
-        // --- ระบบคุณครู ---
+        // --- Teacher ---
         function teacherAuth() {
             if(document.getElementById('teacher-pass').value === 'HWteacher2568') {
                 showPage('teacher-dash');
                 for(let i=1; i<=8; i++) {
-                    const rName = `4/${i}`;
-                    db.ref(`rooms/${rName}/state`).on('value', snap => {
-                        const statusEl = document.getElementById(`room-status-4-${i}`);
-                        const timerEl = document.getElementById(`teacher-timer-4-${i}`);
+                    const rN = `4/${i}`;
+                    db.ref(`rooms/${rN}/state`).on('value', snap => {
+                        const sE = document.getElementById(`room-status-4-${i}`);
+                        const tE = document.getElementById(`teacher-timer-4-${i}`);
                         if(snap.val() === 'started') {
-                            statusEl.innerText = '● กำลังสอบ'; statusEl.className = 'text-[10px] mt-2 font-bold uppercase text-green-500 tracking-widest';
-                            timerEl.classList.remove('hidden'); startTeacherRoomTimer(rName);
+                            sE.innerText = 'ONLINE'; sE.className = 'text-[10px] mt-2 font-bold uppercase text-green-500';
+                            tE.classList.remove('hidden'); startTeacherRoomTimer(rN);
                         } else {
-                            statusEl.innerText = '○ รอเปิดสอบ'; statusEl.className = 'text-[10px] mt-2 font-bold uppercase text-gray-300 tracking-widest';
-                            timerEl.classList.add('hidden');
+                            sE.innerText = 'OFFLINE'; sE.className = 'text-[10px] mt-2 font-bold uppercase text-gray-300';
+                            tE.classList.add('hidden'); if(teacherTimers[rN]) clearInterval(teacherTimers[rN]);
                         }
                     });
                 }
-            } else alert('รหัสผ่านไม่ถูกต้อง');
+            } else alert('Password Incorrect');
         }
 
         function startTeacherRoomTimer(room) {
             if(teacherTimers[room]) clearInterval(teacherTimers[room]);
-            let rTime = 50 * 60; const id = room.replace('/','-');
+            let rT = 50 * 60; const id = room.replace('/','-');
             teacherTimers[room] = setInterval(() => {
-                const ts = formatTime(rTime);
+                const ts = formatTime(rT);
                 document.getElementById(`teacher-timer-${id}`).innerText = ts;
                 if(selectedRoom === room) document.getElementById('room-timer-detail').innerText = ts;
-                if(rTime-- <= 0) clearInterval(teacherTimers[room]);
+                if(rT-- <= 0) clearInterval(teacherTimers[room]);
             }, 1000);
         }
 
         function manageRoom(room) {
             selectedRoom = room;
             document.getElementById('room-controls').classList.remove('hidden');
-            document.getElementById('current-room-title').innerText = "จัดการห้อง ม." + room;
+            document.getElementById('current-room-title').innerText = "ม." + room;
             document.getElementById('active-timer-box').classList.remove('hidden');
-            
             db.ref(`rooms/${room}/state`).on('value', snap => {
                 const btn = document.getElementById('btn-toggle');
                 const isS = snap.val() === 'started';
                 btn.innerText = isS ? "หยุดการสอบ (CLOSE)" : "เริ่มการสอบ (START)";
                 btn.className = `px-8 py-3 rounded-xl text-white font-bold shadow-lg ${isS ? 'bg-red-600' : 'bg-green-600'}`;
             });
-
             db.ref(`presence/${room}`).on('value', snap => {
                 const tbody = document.getElementById('student-list-body');
                 tbody.innerHTML = "";
                 snap.forEach(child => {
                     const d = child.val();
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50 transition border-b">
-                            <td class="p-4 text-center font-bold text-gray-400">${d.no}</td>
-                            <td class="p-4 font-bold text-gray-700">${d.fullname}</td>
-                            <td class="p-4 text-center">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-bold ${d.status==='finished'?'bg-green-100 text-green-600':'bg-blue-100 text-blue-600'}">
-                                    ${d.status.toUpperCase()}
-                                </span>
-                            </td>
-                            <td class="p-4 text-center font-bold text-red-600 bg-red-50 italic">${d.violations || 0}</td>
-                        </tr>`;
+                    tbody.innerHTML += `<tr class="border-b"><td class="p-4 text-center font-bold text-gray-400">${d.no}</td><td class="p-4 font-bold text-gray-700 text-xs">${d.fullname}</td><td class="p-4 text-center"><span class="px-2 py-1 rounded-full text-[8px] font-bold ${d.status==='finished'?'bg-green-100 text-green-600':'bg-blue-100 text-blue-600'}">${d.status.toUpperCase()}</span></td><td class="p-4 text-center font-bold text-red-600 bg-red-50 italic text-xs">${d.violations || 0}</td></tr>`;
                 });
             });
         }
@@ -359,7 +355,7 @@
         }
 
         function clearAllData() {
-            if(!confirm("ล้างข้อมูลนักเรียนทั้งหมดในระบบ?")) return;
+            if(!confirm("⚠️ ล้างข้อมูลนักเรียนทั้งหมดในระบบ?")) return;
             db.ref('presence').remove().then(() => {
                 for(let i=1; i<=8; i++) db.ref(`rooms/4/${i}/state`).set('reset');
                 alert("รีเซ็ตระบบเรียบร้อย"); location.reload();
