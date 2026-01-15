@@ -74,12 +74,11 @@
             <p class="text-gray-500 mt-2">กำลังรอคุณครูเปิดระบบสอบห้อง <span id="wait-class" class="font-bold underline text-black"></span></p>
         </div>
 
-        <div id="exam-container" class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl hidden mb-10 border-b-8 border-blue-900">
-            <div class="mb-8 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 flex justify-between items-center">
+        <div id="exam-container" class="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl hidden mb-10 border-t-8 border-blue-900">
+             <div class="mb-8 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500 flex justify-between items-center">
                 <h2 class="text-xl font-bold text-blue-800">ส่วนที่ 1: ความรู้พื้นฐาน Blender (12 คะแนน)</h2>
                 <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded font-bold">ห้ามสลับหน้าจอ</span>
             </div>
-
             <div class="space-y-10">
                 <div class="exam-card">
                     <p class="font-bold text-lg mb-4 text-gray-700">1. โปรแกรม Blender คือซอฟต์แวร์ที่มีวัตถุประสงค์หลักเพื่ออะไร?</p>
@@ -93,7 +92,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="mt-10 pt-6 border-t text-center">
                 <button onclick="finishExam()" class="bg-green-600 text-white px-12 py-4 rounded-xl font-bold text-xl hover:bg-green-700 shadow-2xl transition transform hover:scale-105">ส่งข้อสอบ (FINISH)</button>
             </div>
@@ -103,15 +101,12 @@
             <h2 class="text-xl font-bold mb-4 text-red-600">ระบบจัดการสำหรับคุณครู</h2>
             <input type="password" id="teacher-pass" placeholder="รหัสผ่าน" class="w-full border p-3 mb-4 rounded-lg outline-none text-center">
             <button onclick="teacherAuth()" class="w-full bg-red-600 text-white p-4 rounded-xl font-bold">เข้าสู่ระบบ</button>
-            <button onclick="showPage('page-entry')" class="mt-4 text-gray-400 text-xs underline">ย้อนกลับ</button>
         </div>
 
         <div id="teacher-dash" class="max-w-5xl mx-auto hidden bg-white p-8 rounded-2xl shadow-xl">
             <div class="flex justify-between items-center mb-8 pb-4 border-b">
                 <h2 class="text-2xl font-bold text-gray-800">แผงควบคุมคุณครู</h2>
-                <button onclick="clearAllData()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-600 hover:text-white transition">
-                    ล้างข้อมูลนักเรียนทั้งหมด (RESET)
-                </button>
+                <button onclick="clearAllData()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-600 hover:text-white transition">ล้างข้อมูลทั้งหมด (RESET)</button>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
@@ -121,6 +116,7 @@
                             <div onclick="manageRoom('4/${i}')" class="p-6 border-2 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition text-center group">
                                 <h3 class="font-bold text-lg group-hover:text-blue-600">ห้อง 4/${i}</h3>
                                 <p id="room-status-4-${i}" class="text-[10px] mt-2 text-gray-400 font-bold uppercase">รอเปิดสอบ</p>
+                                <p id="teacher-timer-4-${i}" class="text-sm mt-1 font-bold text-red-600 hidden">00:00</p>
                             </div>
                         `);
                     }
@@ -130,7 +126,13 @@
             <div id="room-controls" class="hidden border-t-4 border-blue-600 pt-8 mt-8">
                 <div class="flex justify-between items-center mb-6">
                     <h3 id="current-room-title" class="text-2xl font-bold"></h3>
-                    <button id="btn-toggle" onclick="toggleExam()" class="px-8 py-3 rounded-xl text-white font-bold shadow-lg transition"></button>
+                    <div class="flex gap-4 items-center">
+                        <div id="active-timer-box" class="hidden bg-gray-100 px-4 py-2 rounded-lg border">
+                            <span class="text-xs text-gray-500 block">เวลาห้องนี้:</span>
+                            <span id="room-timer-detail" class="text-xl font-bold text-red-600">45:00</span>
+                        </div>
+                        <button id="btn-toggle" onclick="toggleExam()" class="px-8 py-3 rounded-xl text-white font-bold shadow-lg transition"></button>
+                    </div>
                 </div>
                 
                 <div class="overflow-x-auto rounded-xl border border-gray-100">
@@ -160,11 +162,18 @@
     <script>
         let me = {}; let violationCount = 0; let timeLeft = 45 * 60;
         let timerInterval; let selectedRoom = "";
+        let teacherTimers = {}; // เก็บ Interval ของแต่ละห้องในเครื่องครู
 
         function showPage(id) {
             document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             window.scrollTo(0,0);
+        }
+
+        function formatTime(seconds) {
+            let m = Math.floor(seconds / 60);
+            let s = seconds % 60;
+            return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
         }
 
         // --- ระบบนักเรียน ---
@@ -182,7 +191,7 @@
             db.ref(`presence/${room}/${no}`).set(me);
             db.ref(`rooms/${room}/state`).on('value', snap => {
                 if(snap.val() === 'started') startExam();
-                if(snap.val() === 'reset') location.reload();
+                if(snap.val() === 'reset' || snap.val() === 'closed') location.reload();
             });
         }
 
@@ -192,8 +201,7 @@
             document.getElementById('timer-display').classList.remove('hidden');
             
             timerInterval = setInterval(() => {
-                let mins = Math.floor(timeLeft / 60); let secs = timeLeft % 60;
-                document.getElementById('timer-display').innerText = `เวลาคงเหลือ: ${mins}:${secs < 10 ? '0'+secs : secs}`;
+                document.getElementById('timer-display').innerText = `เวลาคงเหลือ: ${formatTime(timeLeft)}`;
                 if (timeLeft-- <= 0) { clearInterval(timerInterval); finishExam(); }
             }, 1000);
 
@@ -201,8 +209,6 @@
                 if (document.visibilityState === 'hidden' && !document.getElementById('exam-container').classList.contains('hidden')) {
                     violationCount++;
                     db.ref(`presence/${me.room}/${me.no}/violations`).set(violationCount);
-                    document.body.classList.add('violation-flash');
-                    setTimeout(() => document.body.classList.remove('violation-flash'), 500);
                 }
             });
         }
@@ -212,7 +218,7 @@
             db.ref(`presence/${me.room}/${me.no}/status`).set('finished');
             showPage('result-page');
             document.getElementById('final-info').innerText = `${me.name} | ม.${me.room} เลขที่ ${me.no}`;
-            document.getElementById('violation-report').innerText = `พฤติกรรม: สลับหน้าจอ ${violationCount} ครั้ง`;
+            document.getElementById('violation-report').innerText = `สลับหน้าจอ: ${violationCount} ครั้ง`;
         }
 
         // --- ระบบคุณครู ---
@@ -220,21 +226,50 @@
             if(document.getElementById('teacher-pass').value === 'HWteacher2568') {
                 showPage('teacher-dash');
                 for(let i=1; i<=8; i++) {
-                    db.ref(`rooms/4/${i}/state`).on('value', snap => {
-                        const el = document.getElementById(`room-status-4-${i}`);
-                        el.innerText = snap.val() === 'started' ? '● กำลังสอบ' : '○ รอเปิดสอบ';
-                        el.className = `text-[10px] mt-2 font-bold uppercase ${snap.val() === 'started' ? 'text-green-500' : 'text-gray-300'}`;
+                    const rName = `4/${i}`;
+                    db.ref(`rooms/${rName}/state`).on('value', snap => {
+                        const statusEl = document.getElementById(`room-status-${rName.replace('/','-')}`);
+                        const timerEl = document.getElementById(`teacher-timer-${rName.replace('/','-')}`);
+                        
+                        if(snap.val() === 'started') {
+                            statusEl.innerText = '● กำลังสอบ';
+                            statusEl.className = 'text-[10px] mt-2 font-bold uppercase text-green-500';
+                            timerEl.classList.remove('hidden');
+                            startTeacherRoomTimer(rName);
+                        } else {
+                            statusEl.innerText = '○ รอเปิดสอบ';
+                            statusEl.className = 'text-[10px] mt-2 font-bold uppercase text-gray-300';
+                            timerEl.classList.add('hidden');
+                            if(teacherTimers[rName]) clearInterval(teacherTimers[rName]);
+                        }
+                    });
+                    // นับจำนวนเด็กออนไลน์
+                    db.ref(`presence/${rName}`).on('value', s => {
+                         // ตัวนับออนไลน์จะใส่ไว้ใน manageRoom หรือที่อื่นๆ ตามสะดวก
                     });
                 }
             } else alert('รหัสผ่านไม่ถูกต้อง');
+        }
+
+        function startTeacherRoomTimer(room) {
+            if(teacherTimers[room]) clearInterval(teacherTimers[room]);
+            let rTime = 45 * 60;
+            const id = room.replace('/','-');
+            teacherTimers[room] = setInterval(() => {
+                const timeStr = formatTime(rTime);
+                document.getElementById(`teacher-timer-${id}`).innerText = timeStr;
+                if(selectedRoom === room) document.getElementById('room-timer-detail').innerText = timeStr;
+                if(rTime-- <= 0) clearInterval(teacherTimers[room]);
+            }, 1000);
         }
 
         function manageRoom(room) {
             selectedRoom = room;
             document.getElementById('room-controls').classList.remove('hidden');
             document.getElementById('current-room-title').innerText = "ม." + room;
+            document.getElementById('active-timer-box').classList.remove('hidden');
             
-            db.ref(`rooms/${room}/state`).on('value', snap => {
+            db.ref(`rooms/${room}/state`).once('value', snap => {
                 const btn = document.getElementById('btn-toggle');
                 const isS = snap.val() === 'started';
                 btn.innerText = isS ? "หยุดการสอบ (CLOSE)" : "เริ่มการสอบ (START)";
@@ -247,11 +282,11 @@
                 snap.forEach(child => {
                     const d = child.val();
                     tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50 transition">
+                        <tr class="hover:bg-gray-50 transition border-b">
                             <td class="p-4 text-center font-bold text-gray-400">${d.no}</td>
                             <td class="p-4 font-bold text-gray-700">${d.name}</td>
                             <td class="p-4 text-center">
-                                <span class="px-3 py-1 rounded-full text-[10px] font-bold ${d.status==='finished'?'bg-green-100 text-green-600':'bg-blue-100 text-blue-100'}">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-bold ${d.status==='finished'?'bg-green-100 text-green-600':'bg-blue-100 text-blue-600'}">
                                     ${d.status.toUpperCase()}
                                 </span>
                             </td>
@@ -263,25 +298,19 @@
 
         function toggleExam() {
             const ref = db.ref(`rooms/${selectedRoom}/state`);
-            ref.once('value', s => ref.set(s.val() === 'started' ? 'closed' : 'started'));
+            ref.once('value', s => {
+                const newState = s.val() === 'started' ? 'closed' : 'started';
+                ref.set(newState);
+            });
         }
 
-        // ฟังก์ชันลบข้อมูลทั้งหมด
         function clearAllData() {
-            if(!confirm("⚠️ คำเตือน: คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลนักเรียนทั้งหมด? \n\nการกระทำนี้จะลบรายชื่อนักเรียนและจำนวนครั้งการพับหน้าจอในทุกห้อง และไม่สามารถย้อนคืนได้")) return;
-            
-            // ลบข้อมูลรายชื่อนักเรียน (presence) ทั้งหมด
-            db.ref('presence').remove()
-                .then(() => {
-                    // รีเซ็ตสถานะทุกห้องเป็น 'reset' เพื่อให้หน้าจอเด็กที่ค้างอยู่เด้งกลับหน้าแรก
-                    for(let i=1; i<=8; i++) {
-                        db.ref(`rooms/4/${i}/state`).set('reset');
-                        setTimeout(() => db.ref(`rooms/4/${i}/state`).set('closed'), 1000);
-                    }
-                    alert("ล้างข้อมูลการทดสอบเรียบร้อยแล้ว ระบบพร้อมสำหรับการสอบจริง");
-                    location.reload();
-                })
-                .catch(err => alert("เกิดข้อผิดพลาด: " + err.message));
+            if(!confirm("⚠️ ล้างข้อมูลนักเรียนทั้งหมดเพื่อเริ่มใหม่?")) return;
+            db.ref('presence').remove().then(() => {
+                for(let i=1; i<=8; i++) db.ref(`rooms/4/${i}/state`).set('reset');
+                alert("รีเซ็ตระบบเรียบร้อย");
+                location.reload();
+            });
         }
     </script>
 </body>
